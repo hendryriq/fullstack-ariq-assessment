@@ -13,8 +13,10 @@ const BUTTON_VARIANTS = {
   ghost: "font-medium text-white hover:bg-white/10",
 };
 
+export type ButtonVariant = keyof typeof BUTTON_VARIANTS;
+
 type ButtonProps = ComponentProps<"button"> & {
-  variant?: keyof typeof BUTTON_VARIANTS;
+  variant?: ButtonVariant;
 };
 
 export function Button({
@@ -45,12 +47,57 @@ export function Field({
   );
 }
 
+const fieldStyles = `w-full min-w-0 rounded-card border border-cloud bg-white px-3 py-2 text-base font-normal md:text-sm ${focusRing}`;
+
 export function Input({ className = "", ...props }: ComponentProps<"input">) {
+  return <input {...props} className={`${fieldStyles} ${className}`} />;
+}
+
+export function Select({ className = "", ...props }: ComponentProps<"select">) {
+  return <select {...props} className={`${fieldStyles} ${className}`} />;
+}
+
+export function Textarea({
+  className = "",
+  ...props
+}: ComponentProps<"textarea">) {
+  return <textarea {...props} className={`${fieldStyles} ${className}`} />;
+}
+
+export function PageHeader({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string;
+}) {
   return (
-    <input
-      {...props}
-      className={`rounded-card border border-cloud bg-white px-3 py-2 text-base font-normal md:text-sm ${focusRing} ${className}`}
-    />
+    <div>
+      <h1 className="text-2xl font-semibold">{title}</h1>
+      {description && <p className="text-sm text-muted">{description}</p>}
+    </div>
+  );
+}
+
+export function PageLoading() {
+  return <p className="text-sm text-muted">Loading…</p>;
+}
+
+// Hides a row's less common action until it is needed.
+export function Disclosure({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className="text-sm">
+      <summary className="cursor-pointer font-medium whitespace-nowrap underline">
+        {label}
+      </summary>
+      <div className="mt-2 min-w-56">{children}</div>
+    </details>
   );
 }
 
@@ -101,6 +148,7 @@ const STATUS_TONES = {
   submitted: "pending",
   returned: "danger",
   void: "danger",
+  needs_top_up: "danger",
   draft: "neutral",
   scheduled: "neutral",
   cancelled: "neutral",
@@ -116,7 +164,7 @@ export function StatusBadge({ status }: { status: Status }) {
       className={`inline-flex items-center gap-1.5 rounded-card px-2 py-0.5 text-xs font-medium capitalize ${tone.background}`}
     >
       <span aria-hidden className={`size-1.5 rounded-full ${tone.dot}`} />
-      {status.replace("_", " ")}
+      {status.replaceAll("_", " ")}
     </span>
   );
 }
