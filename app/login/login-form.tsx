@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { signIn, type LoginState } from "@/app/actions/auth";
+import { Alert, Button, Field, Input } from "@/components/ui";
 
 const initialState: LoginState = { error: null, email: "" };
 
@@ -10,39 +11,27 @@ export function LoginForm() {
 
   return (
     <form action={action} className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1">
-        Email
-        <input
+      <Field label="Email">
+        <Input
           name="email"
           type="email"
           autoComplete="username"
           defaultValue={state.email}
           required
-          className="rounded border px-3 py-2"
         />
-      </label>
-      <label className="flex flex-col gap-1">
-        Password
-        <input
+      </Field>
+      <Field label="Password">
+        <Input
           name="password"
           type="password"
           autoComplete="current-password"
           required
-          className="rounded border px-3 py-2"
         />
-      </label>
-      {state.error && (
-        <p role="alert" className="text-red-600">
-          {state.error}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded border px-3 py-2 font-medium disabled:opacity-50"
-      >
+      </Field>
+      {state.error && <Alert>{state.error}</Alert>}
+      <Button type="submit" disabled={pending} className="w-full">
         {pending ? "Signing in…" : "Sign in"}
-      </button>
+      </Button>
     </form>
   );
 }
