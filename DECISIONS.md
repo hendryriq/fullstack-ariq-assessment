@@ -5,7 +5,7 @@
 ## Conventions used throughout
 
 - **Money** is stored as integer rupiah (`bigint`), never floats. A lesson's earnings are `round(tutor_rate × minutes / 60)`, so 90 minutes at Rp100,000/hour is Rp150,000.
-- **Durations** are stored as integer minutes (derived from `ends_at - starts_at`) to avoid fractional-hour rounding.
+- **Durations** are stored as integer minutes (derived from `ends_at - starts_at`) to avoid fractional-hour rounding. A lesson must be between 15 minutes and 8 hours long, so a mistyped end date cannot wipe out students' hours or inflate earnings. `schedule_lesson()` enforces this.
 - **Time** is stored as `timestamptz` (UTC) and entered/displayed in `Asia/Jakarta` (WIB, UTC+7). WIB has no daylight saving, so month boundaries are unambiguous.
 - **Assumption:** in a group class every paid, active student is charged for every lesson that takes place, regardless of attendance. Per-student attendance is out of scope (see "What I would build next").
 - **Every write is a Postgres function (RPC)** that checks the caller and runs in a single transaction: creating and updating classes, enrolling, invoice changes, scheduling, logbook changes. API clients have `SELECT` only on tables (grants plus read-only RLS), so neither the UI nor a direct API call can bypass a rule.

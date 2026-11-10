@@ -13,6 +13,7 @@ import {
 } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
 import { isPast } from "@/lib/format";
+import { MAX_LENGTH } from "@/lib/limits";
 import { createClient } from "@/lib/supabase/server";
 import { cancelLesson, scheduleLesson } from "../actions";
 
@@ -57,7 +58,10 @@ async function TutorSchedule() {
         description="Lessons for your classes. All times are in WIB."
       />
       <Card>
-        <h2 className="mb-4 font-semibold">New lesson</h2>
+        <h2 className="font-semibold">New lesson</h2>
+        <p className="mb-4 text-sm text-muted">
+          A lesson can be 15 minutes to 8 hours long.
+        </p>
         {classes.data.length === 0 ? (
           <p className="text-sm text-muted">
             You need an assigned class before you can schedule lessons.
@@ -108,7 +112,7 @@ async function TutorSchedule() {
               >
                 <input type="hidden" name="lesson_id" value={lesson.id} />
                 <Field label="Reason">
-                  <Input name="reason" required />
+                  <Input name="reason" required maxLength={MAX_LENGTH.reason} />
                 </Field>
               </ActionForm>
             </Disclosure>

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
 import { formatDuration } from "@/lib/format";
+import { MAX_LENGTH } from "@/lib/limits";
 import { createClient } from "@/lib/supabase/server";
 import { endEnrollment } from "./actions";
 
@@ -123,7 +124,11 @@ async function StudentsContent() {
                                 value={enrollment.id}
                               />
                               <Field label="Reason">
-                                <Input name="reason" required />
+                                <Input
+                                  name="reason"
+                                  required
+                                  maxLength={MAX_LENGTH.reason}
+                                />
                               </Field>
                             </ActionForm>
                           </Disclosure>

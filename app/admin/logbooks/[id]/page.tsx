@@ -22,6 +22,7 @@ import {
   formatMonth,
   formatRupiah,
 } from "@/lib/format";
+import { MAX_LENGTH } from "@/lib/limits";
 import { createClient } from "@/lib/supabase/server";
 import { approveLogbook, returnLogbook } from "../actions";
 
@@ -176,7 +177,12 @@ async function ReviewLogbook({ id }: { id: string }) {
             >
               <input type="hidden" name="logbook_id" value={logbook.id} />
               <Field label="Note">
-                <Textarea name="note" rows={3} required />
+                <Textarea
+                  name="note"
+                  rows={3}
+                  required
+                  maxLength={MAX_LENGTH.returnNote}
+                />
               </Field>
             </ActionForm>
           </Card>

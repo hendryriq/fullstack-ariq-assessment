@@ -1,4 +1,5 @@
 import { Field, Input, Select, Textarea } from "@/components/ui";
+import { MAX_LENGTH } from "@/lib/limits";
 
 type ClassValues = {
   title: string;
@@ -20,7 +21,12 @@ export function ClassFields({
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <Field label="Title">
-        <Input name="title" required defaultValue={values?.title} />
+        <Input
+          name="title"
+          required
+          maxLength={MAX_LENGTH.classTitle}
+          defaultValue={values?.title}
+        />
       </Field>
       <Field label="Assigned tutor">
         <Select name="tutor_id" required defaultValue={values?.tutorId ?? ""}>
@@ -70,6 +76,7 @@ export function ClassFields({
           <Textarea
             name="description"
             rows={3}
+            maxLength={MAX_LENGTH.classDescription}
             defaultValue={values?.description}
           />
         </Field>

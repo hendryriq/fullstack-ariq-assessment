@@ -157,7 +157,7 @@ async function TutorLogbooks() {
         return (
           <Card key={group.key}>
             <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-              <div>
+              <div className="min-w-0">
                 <h2 className="font-semibold">{group.title}</h2>
                 <p className="text-sm text-muted">{formatMonth(group.month)}</p>
               </div>

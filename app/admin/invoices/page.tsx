@@ -14,6 +14,7 @@ import {
 } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
 import { formatDateTime, formatRupiah } from "@/lib/format";
+import { MAX_LENGTH } from "@/lib/limits";
 import { createClient } from "@/lib/supabase/server";
 import { cancelInvoice, markInvoicePaid, voidInvoice } from "./actions";
 
@@ -130,7 +131,7 @@ function InvoiceActions({
           <ActionForm action={markInvoicePaid} submitLabel="Confirm payment">
             {invoiceField}
             <Field label="Reference note (optional)">
-              <Input name="reference_note" />
+              <Input name="reference_note" maxLength={MAX_LENGTH.reason} />
             </Field>
           </ActionForm>
         </Disclosure>
@@ -142,7 +143,7 @@ function InvoiceActions({
           >
             {invoiceField}
             <Field label="Reason (optional)">
-              <Input name="reason" />
+              <Input name="reason" maxLength={MAX_LENGTH.reason} />
             </Field>
           </ActionForm>
         </Disclosure>
@@ -161,7 +162,7 @@ function InvoiceActions({
         >
           {invoiceField}
           <Field label="Reason">
-            <Input name="reason" required />
+            <Input name="reason" required maxLength={MAX_LENGTH.reason} />
           </Field>
         </ActionForm>
       </Disclosure>

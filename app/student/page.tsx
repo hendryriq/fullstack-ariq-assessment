@@ -71,7 +71,7 @@ async function MyClasses() {
         return (
           <Card key={balance.enrollment_id}>
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
+              <div className="min-w-0">
                 <h2 className="font-semibold">{item?.title}</h2>
                 <p className="text-sm text-muted">Tutor: {item?.tutor_name}</p>
               </div>
@@ -109,7 +109,7 @@ async function MyClasses() {
       {awaitingPayment.map((item) => (
         <Card key={item.class_id}>
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <h2 className="font-semibold">{item.title}</h2>
+            <h2 className="min-w-0 font-semibold">{item.title}</h2>
             <StatusBadge status="pending_payment" />
           </div>
           <p className="mt-2 text-sm">

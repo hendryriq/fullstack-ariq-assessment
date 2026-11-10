@@ -15,6 +15,7 @@ import {
 } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
 import { formatLessonTime, isPast } from "@/lib/format";
+import { MAX_LENGTH } from "@/lib/limits";
 import { createClient } from "@/lib/supabase/server";
 import { removeLogbookEntry, saveLogbookEntry } from "../../actions";
 
@@ -73,13 +74,19 @@ async function LessonEntry({ id }: { id: string }) {
           <ActionForm action={saveLogbookEntry} submitLabel="Save entry">
             <input type="hidden" name="lesson_id" value={lesson.id} />
             <Field label="Topic">
-              <Input name="topic" required defaultValue={entry?.topic} />
+              <Input
+                name="topic"
+                required
+                maxLength={MAX_LENGTH.entryTopic}
+                defaultValue={entry?.topic}
+              />
             </Field>
             <Field label="Activities">
               <Textarea
                 name="activities"
                 rows={4}
                 required
+                maxLength={MAX_LENGTH.entryText}
                 defaultValue={entry?.activities}
               />
             </Field>
@@ -88,6 +95,7 @@ async function LessonEntry({ id }: { id: string }) {
                 name="tutor_observation"
                 rows={4}
                 required
+                maxLength={MAX_LENGTH.entryText}
                 defaultValue={entry?.tutor_observation}
               />
             </Field>
@@ -96,6 +104,7 @@ async function LessonEntry({ id }: { id: string }) {
                 name="future_recommendation"
                 rows={4}
                 required
+                maxLength={MAX_LENGTH.entryText}
                 defaultValue={entry?.future_recommendation}
               />
             </Field>
