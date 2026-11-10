@@ -9,7 +9,7 @@
 
 -- ============================================================================
 -- AUTH USERS
--- Passwords: Admin123!, Tutor123!, Student123!
+-- Every account uses the password: password123 (local development only)
 -- GoTrue cannot read NULL in the token columns, so they are set to ''.
 -- ============================================================================
 
@@ -30,12 +30,12 @@ SELECT
   '{"provider":"email","providers":["email"]}'::jsonb,
   '{}'::jsonb
 FROM (VALUES
-  ('11111111-1111-1111-1111-111111111111', 'admin@stargeneration.test', 'Admin123!'),
-  ('22222222-2222-2222-2222-222222222222', 'tutor1@stargeneration.test', 'Tutor123!'),
-  ('33333333-3333-3333-3333-333333333333', 'tutor2@stargeneration.test', 'Tutor123!'),
-  ('44444444-4444-4444-4444-444444444444', 'student1@stargeneration.test', 'Student123!'),
-  ('55555555-5555-5555-5555-555555555555', 'student2@stargeneration.test', 'Student123!'),
-  ('66666666-6666-6666-6666-666666666666', 'student3@stargeneration.test', 'Student123!')
+  ('11111111-1111-1111-1111-111111111111', 'admin@star.test', 'password123'),
+  ('22222222-2222-2222-2222-222222222222', 'tutor1@star.test', 'password123'),
+  ('33333333-3333-3333-3333-333333333333', 'tutor2@star.test', 'password123'),
+  ('44444444-4444-4444-4444-444444444444', 'student1@star.test', 'password123'),
+  ('55555555-5555-5555-5555-555555555555', 'student2@star.test', 'password123'),
+  ('66666666-6666-6666-6666-666666666666', 'student3@star.test', 'password123')
 ) AS v(id, email, password)
 ON CONFLICT (id) DO NOTHING;
 
@@ -48,17 +48,17 @@ SELECT
   'email',
   now(), now(), now()
 FROM auth.users u
-WHERE u.email LIKE '%@stargeneration.test'
+WHERE u.email LIKE '%@star.test'
 ON CONFLICT DO NOTHING;
 
 -- Application users table
 INSERT INTO users (id, email, full_name, role) VALUES
-  ('11111111-1111-1111-1111-111111111111', 'admin@stargeneration.test', 'Admin User', 'admin'),
-  ('22222222-2222-2222-2222-222222222222', 'tutor1@stargeneration.test', 'Budi Santoso', 'tutor'),
-  ('33333333-3333-3333-3333-333333333333', 'tutor2@stargeneration.test', 'Siti Rahayu', 'tutor'),
-  ('44444444-4444-4444-4444-444444444444', 'student1@stargeneration.test', 'Ahmad Rizki', 'student'),
-  ('55555555-5555-5555-5555-555555555555', 'student2@stargeneration.test', 'Dewi Putri', 'student'),
-  ('66666666-6666-6666-6666-666666666666', 'student3@stargeneration.test', 'Fajar Ramadhan', 'student')
+  ('11111111-1111-1111-1111-111111111111', 'admin@star.test', 'Admin User', 'admin'),
+  ('22222222-2222-2222-2222-222222222222', 'tutor1@star.test', 'Budi Santoso', 'tutor'),
+  ('33333333-3333-3333-3333-333333333333', 'tutor2@star.test', 'Siti Rahayu', 'tutor'),
+  ('44444444-4444-4444-4444-444444444444', 'student1@star.test', 'Ahmad Rizki', 'student'),
+  ('55555555-5555-5555-5555-555555555555', 'student2@star.test', 'Dewi Putri', 'student'),
+  ('66666666-6666-6666-6666-666666666666', 'student3@star.test', 'Fajar Ramadhan', 'student')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
@@ -211,14 +211,14 @@ INSERT INTO audit_log (event_type, entity_type, entity_id, actor_id, metadata, c
 -- ============================================================================
 
 -- Users:
---   admin@stargeneration.test (Admin User)
---   tutor1@stargeneration.test (Budi Santoso)
---   tutor2@stargeneration.test (Siti Rahayu) - not assigned to any class yet
---   student1@stargeneration.test (Ahmad Rizki) - enrolled & paid
---   student2@stargeneration.test (Dewi Putri) - NOT enrolled (can take the last seat)
---   student3@stargeneration.test (Fajar Ramadhan) - NOT enrolled (can test capacity limit)
+--   admin@star.test (Admin User)
+--   tutor1@star.test (Budi Santoso)
+--   tutor2@star.test (Siti Rahayu) - not assigned to any class yet
+--   student1@star.test (Ahmad Rizki) - enrolled & paid
+--   student2@star.test (Dewi Putri) - NOT enrolled (can take the last seat)
+--   student3@star.test (Fajar Ramadhan) - NOT enrolled (can test capacity limit)
 --
--- Passwords: Admin123!, Tutor123!, Student123!
+-- Every account uses the password: password123
 --
 -- Classes:
 --   Mathematics Grade 10 (1 of 2 seats taken)
