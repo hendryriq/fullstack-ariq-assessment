@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { LogbookEntryFields } from "@/components/logbook-entry-fields";
 import { Card, PageHeader, PageLoading } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
 import { formatLessonTime, formatMonth } from "@/lib/format";
@@ -69,17 +70,9 @@ async function StudentLogbooks() {
                     )}
                   </p>
                 )}
-                <dl className="mt-3 flex flex-col gap-3">
-                  <EntryField label="Activities" value={entry.activities} />
-                  <EntryField
-                    label="Tutor observation"
-                    value={entry.tutor_observation}
-                  />
-                  <EntryField
-                    label="Future recommendation"
-                    value={entry.future_recommendation}
-                  />
-                </dl>
+                <div className="mt-3">
+                  <LogbookEntryFields entry={entry} />
+                </div>
               </article>
             ))}
           </div>
@@ -96,14 +89,5 @@ function sortByLesson<
     (a.lesson?.starts_at ?? a.created_at).localeCompare(
       b.lesson?.starts_at ?? b.created_at,
     ),
-  );
-}
-
-function EntryField({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="font-medium text-muted">{label}</dt>
-      <dd className="whitespace-pre-line">{value}</dd>
-    </div>
   );
 }

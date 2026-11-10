@@ -38,8 +38,26 @@ export function formatMonth(month: string) {
   return monthLabel.format(new Date(`${month}T00:00:00Z`));
 }
 
-export function hasEnded(endsAt: string) {
-  return new Date(endsAt).getTime() <= Date.now();
+export function isPast(value: string) {
+  return new Date(value).getTime() <= Date.now();
+}
+
+const wibYearMonth = new Intl.DateTimeFormat("en-CA", {
+  year: "numeric",
+  month: "2-digit",
+  timeZone: "Asia/Jakarta",
+});
+
+// The first day of the WIB month a time falls in, as logbooks store it.
+export function wibMonthStart(value: string) {
+  return `${wibYearMonth.format(new Date(value))}-01`;
+}
+
+export function isMonthOver(month: string) {
+  const [year, nextMonthIndex] = month.split("-").map(Number);
+
+  // 00:00 WIB on the first of the next month is 17:00 UTC the day before.
+  return Date.UTC(year, nextMonthIndex, 1, -7) <= Date.now();
 }
 
 export function formatRupiah(amount: number) {

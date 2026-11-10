@@ -29,3 +29,9 @@ export function finishAction(error: PostgrestError | null): ActionResult {
 export function readText(formData: FormData, name: string) {
   return String(formData.get(name) ?? "").trim();
 }
+
+// A datetime-local input has no time zone. Lesson times are always entered in
+// WIB, whatever time zone the browser is in.
+export function readWibDateTime(formData: FormData, name: string) {
+  return `${readText(formData, name)}:00+07:00`;
+}

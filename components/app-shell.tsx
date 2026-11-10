@@ -13,7 +13,12 @@ const NAV_ITEMS: Record<Role, { href: string; label: string }[]> = {
     { href: "/admin/invoices", label: "Invoices" },
     { href: "/admin/students", label: "Students" },
   ],
-  tutor: [{ href: "/tutor", label: "Overview" }],
+  tutor: [
+    { href: "/tutor", label: "My classes" },
+    { href: "/tutor/schedule", label: "Schedule" },
+    { href: "/tutor/logbooks", label: "Logbooks" },
+    { href: "/tutor/earnings", label: "Earnings" },
+  ],
   student: [
     { href: "/student", label: "My classes" },
     { href: "/student/classes", label: "Browse classes" },
