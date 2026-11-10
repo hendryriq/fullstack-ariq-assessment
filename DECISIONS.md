@@ -35,14 +35,14 @@
 | **Student rate** | Applies to new invoices only, including top-ups. Existing invoices keep their snapshot. | Hours already bought keep their price. A later top-up uses the new rate. | A student paid a known price for a known number of hours. |
 | **Tutor rate** | Applies to logbooks approved **after** the change, including lessons already taught but not yet approved. Earnings are snapshotted at approval time. The approval RPC takes the previewed total and rejects the approval if it no longer matches, so the admin never approves a number they did not see. | None. Students are charged by the student rate only. | One rate per class is easy to explain, and approved earnings never change. |
 | **Capacity** | Can be raised freely. Cannot be set below the number of seats currently held (pending or active enrollments). | Nobody is removed. | Reducing capacity must not silently evict someone who paid. |
-| **Tutor** | Allowed only when every lesson of the class that has started is already in an **approved** logbook. Upcoming lessons move to the new tutor, unless that tutor already has a lesson at that time. Past lessons and earnings stay with the original tutor (`lessons.tutor_id` is a snapshot). Logbook history stays with the class, so the new tutor can read it and the original tutor no longer can. | Enrollment, hours and access do not change. Upcoming lessons continue with the new tutor. | A logbook is one per class per month, so a tutor change mid-month would mix two tutors' entries and blur who earned what. |
+| **Tutor** | Can change at any time. Only lessons that have not started move to the new tutor, and the change is rejected if that tutor already has a lesson at one of those times. Every lesson that has started stays with the tutor who taught it and is paid to them (`lessons.tutor_id` is a snapshot). The class and its logbooks move to the new tutor, who also writes any entries the previous tutor left unfinished. The previous tutor keeps their lessons and earnings but no longer sees the class or its logbooks. | Enrollment, hours and access do not change. Upcoming lessons continue with the new tutor. | A class should never be stuck because a tutor left. A logbook can safely hold two tutors' lessons because earnings are calculated per lesson, not per logbook. |
 
 **Trade-offs I accepted**
 
-- **Tutor rate:** a change also affects lessons that were taught but not yet approved. To keep the old rate for those lessons, the admin approves the logbook before changing the rate.
-- **Tutor:** the rule is strict. In practice the tutor can only change before the class's first lesson, or after last month's logbook is approved and before the new month's first lesson. I preferred correct earnings attribution over flexibility. The proper fix, effective-dated tutor assignments, is listed under "next".
+- **Tutor rate:** there is one rate per class, as the brief describes, so a change also affects lessons that were taught but not yet approved. That includes the previous tutor's lessons if the rate changes together with a mid-month tutor change. To keep the old rate for a finished month, the admin approves its logbook before changing the rate. Effective-dated rates are listed under "next".
+- **Tutor:** the new tutor may have to write entries for lessons they did not teach, when the previous tutor left them unfinished. The previous tutor is still the one paid for those lessons. I accepted this so that a class can always continue.
 
-**Enforced in:** `update_class()` RPC and a trigger that rejects a capacity below the held seats.
+**Enforced in:** `update_class()` RPC, a trigger that rejects a capacity below the held seats, an exclusion constraint that rejects overlapping lessons for the new tutor, and per-lesson rows in `tutor_earnings`.
 
 ## 3. What happens when a student runs out of hours, or a lesson is cancelled
 
@@ -78,7 +78,7 @@
 - No earnings exist until approval, so returning a logbook has no financial side effects.
 - **Approved is final and read-only** at the database level (trigger blocks `UPDATE`/`DELETE` on the logbook and its entries). Approving again returns the same total and adds nothing, because of `UNIQUE (lesson_id)` on `tutor_earnings` plus a status check. Fixing an approved logbook would require a correction record, which I deliberately left out (see "next").
 
-**Why:** a reject-and-delete flow loses the tutor's work, and letting the admin edit the tutor's entries would put words in the tutor's mouth. Returning keeps the author responsible for the content.
+**Why:** a reject-and-delete flow loses the tutor's work, and letting the admin edit the tutor's entries would put words in the tutor's mouth. Returning keeps the class's tutor responsible for the content.
 
 **Enforced in:** `save_logbook_entry()`, `remove_logbook_entry()`, `submit_logbook()`, `return_logbook()`, `approve_logbook()` RPCs, the open-month check in `schedule_lesson()`, plus immutability triggers on approved rows.
 
@@ -112,7 +112,7 @@
 ### B. Tutors see what they will be paid, with a stale-number guard
 
 - **Who it helps:** tutors, who ask the admin every month what they will be paid, and the admin, who stops answering that question and can approve safely.
-- **What it does:** the brief already requires an admin preview and earnings after approval. I added two things. A tutor can open the same preview for their own class before approval, so they see the amount as soon as their entries are in. And `approve_logbook(id, expected_total)` recomputes inside the transaction and refuses if the total differs from what was previewed. Preview and approval use one calculation, so the tutor and the admin see the same number. The preview contains the tutor rate only, never the student rate.
+- **What it does:** the brief already requires an admin preview and earnings after approval. I added two things. A tutor can open the same preview before approval, limited to the lessons they taught, so they see the amount as soon as the entries are in. And `approve_logbook(id, expected_total)` recomputes inside the transaction and refuses if the total differs from what was previewed. Preview and approval use one calculation, so the tutor and the admin see the same amount for each lesson. The preview contains the tutor rate only, never the student rate.
 - **Why this over alternatives:** a payslip sent after approval would come too late, because the question is what they *will* be paid. Calculating the estimate in the browser would add a second formula that could disagree with the real one.
 - **Left out:** payout batches, payslip export, pending-versus-paid payout status.
 
@@ -131,4 +131,4 @@
 2. **Pending-invoice expiry**, to release seats that are held but never paid.
 3. **Notifications** (email or WhatsApp) for invoice created, logbook returned or approved, and hours running low.
 
-**Beyond one day:** effective-dated tutor assignments so a tutor can be replaced mid-month, correction records for approved logbooks, credit notes and refunds, per-student attendance with make-up lessons, and a real payment gateway with webhooks.
+**Beyond one day:** effective-dated tutor rates so a rate change never affects lessons already taught, correction records for approved logbooks, credit notes and refunds, per-student attendance with make-up lessons, and a real payment gateway with webhooks.
