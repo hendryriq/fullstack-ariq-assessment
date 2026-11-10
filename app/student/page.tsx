@@ -4,7 +4,7 @@ import { requireRole } from "@/lib/auth";
 
 export default function StudentPage() {
   return (
-    <Suspense fallback={<p className="p-8">Loading…</p>}>
+    <Suspense fallback={<p className="text-sm text-muted">Loading…</p>}>
       <StudentHome />
     </Suspense>
   );
