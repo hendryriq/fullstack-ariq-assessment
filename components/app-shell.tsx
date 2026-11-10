@@ -1,8 +1,7 @@
 import { Suspense, type ReactNode } from "react";
-import { signOut } from "@/app/actions/auth";
 import { Brand } from "@/components/brand";
 import { NavLink, NavLinkFallback } from "@/components/nav-link";
-import { Button } from "@/components/ui";
+import { SignOutButton } from "@/components/sign-out-button";
 import { getCurrentUser, type Role } from "@/lib/auth";
 
 // Each role's pages are added here as they are built.
@@ -54,15 +53,7 @@ export function AppShell({
           <Suspense fallback={null}>
             <SignedInName />
           </Suspense>
-          <form action={signOut}>
-            <Button
-              type="submit"
-              variant="ghost"
-              className="md:w-full md:px-3 md:text-left"
-            >
-              Sign out
-            </Button>
-          </form>
+          <SignOutButton />
         </div>
       </aside>
       <main className="min-w-0 flex-1 p-4 md:p-8">{children}</main>

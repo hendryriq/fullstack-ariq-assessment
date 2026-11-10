@@ -4,10 +4,22 @@ import { useActionState } from "react";
 import { signIn, type LoginState } from "@/app/actions/auth";
 import { Alert, Button, Field, Input } from "@/components/ui";
 
-const initialState: LoginState = { error: null, email: "" };
+const initialState: LoginState = { error: null, email: "", redirectTo: null };
 
 export function LoginForm() {
-  const [state, action, pending] = useActionState(signIn, initialState);
+  const [state, action, pending] = useActionState(
+    async (previous: LoginState, formData: FormData) => {
+      const result = await signIn(previous, formData);
+
+      // A full page load clears pages Next keeps hidden from the previous user.
+      if (result.redirectTo) {
+        window.location.replace(result.redirectTo);
+      }
+
+      return result;
+    },
+    initialState,
+  );
 
   return (
     <form action={action} className="flex flex-col gap-4">
