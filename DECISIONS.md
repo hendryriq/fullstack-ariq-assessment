@@ -1,7 +1,5 @@
 # DECISIONS.md
 
-> **Status:** the database rules below are implemented and tested. The pages they mention (dashboard, earnings, audit list) are still being built. Delete this note before submitting.
-
 ## Conventions used throughout
 
 - **Money** is stored as integer rupiah (`bigint`), never floats. A lesson's earnings are `round(tutor_rate × minutes / 60)`, so 90 minutes at Rp100,000/hour is Rp150,000.
@@ -10,6 +8,8 @@
 - **Assumption:** in a group class every paid, active student is charged for every lesson that takes place, regardless of attendance. Per-student attendance is out of scope (see "What I would build next").
 - **Every write is a Postgres function (RPC)** that checks the caller and runs in a single transaction: creating and updating classes, enrolling, invoice changes, scheduling, logbook changes. API clients have `SELECT` only on tables (grants plus read-only RLS), so neither the UI nor a direct API call can bypass a rule.
 - **Class catalog:** "students see only classes they have paid for" covers the schedule and logbooks. A student still has to choose a class before paying, so `get_class_catalog()` returns only what is needed to enroll: title, description, tutor name, student rate and seats left. It refuses tutors, who must never see student rates.
+- **Students who join later** can read the class's earlier approved logbooks, so they can catch up. The dates of lessons from before their access started stay hidden, in line with the schedule.
+- **Free text is limited** in the database and in the forms, for example 120 characters for a class title and 5,000 for each logbook field.
 
 ---
 
@@ -22,6 +22,7 @@
 - **Hours remaining** = purchased minutes (paid invoices for that enrollment) − consumed minutes.
 - **Consumed minutes** = total duration of lessons in that class that have **ended**, are **not cancelled**, and ended after the student's access started (`enrollment.activated_at`, set when the first invoice is paid). A student who joins mid-term is not charged for earlier lessons.
 - Hours are consumed when a lesson **ends**, not when its logbook is approved. Students see an accurate balance right away, while logbook approval only gates earnings and logbook visibility.
+- A tutor can add a lesson in the past, for one that was taught but never scheduled. It uses students' hours like any other lesson that has ended.
 - Hours remaining is a **database view**, not a stored counter, so it cannot drift out of sync.
 
 **Why:** a snapshot makes invoices immutable facts, and a derived balance is always consistent with the lessons table. A stored counter would need extra code to stay correct when lessons are cancelled or corrected.
@@ -42,7 +43,7 @@
 - **Tutor rate:** there is one rate per class, as the brief describes, so a change also affects lessons that were taught but not yet approved. That includes the previous tutor's lessons if the rate changes together with a mid-month tutor change. To keep the old rate for a finished month, the admin approves its logbook before changing the rate. Effective-dated rates are listed under "next".
 - **Tutor:** the new tutor may have to write entries for lessons they did not teach, when the previous tutor left them unfinished. The previous tutor is still the one paid for those lessons. I accepted this so that a class can always continue.
 
-**Enforced in:** `update_class()` RPC, a trigger that rejects a capacity below the held seats, an exclusion constraint that rejects overlapping lessons for the new tutor, and per-lesson rows in `tutor_earnings`.
+**Enforced in:** `update_class()` RPC, a row lock shared with `schedule_lesson()` so a lesson scheduled at the same moment follows the new tutor, a trigger that rejects a capacity below the held seats, an exclusion constraint that rejects overlapping lessons for the new tutor, and per-lesson rows in `tutor_earnings`.
 
 ## 3. What happens when a student runs out of hours, or a lesson is cancelled
 
@@ -80,7 +81,7 @@
 
 **Why:** a reject-and-delete flow loses the tutor's work, and letting the admin edit the tutor's entries would put words in the tutor's mouth. Returning keeps the class's tutor responsible for the content.
 
-**Enforced in:** `save_logbook_entry()`, `remove_logbook_entry()`, `submit_logbook()`, `return_logbook()`, `approve_logbook()` RPCs, the open-month check in `schedule_lesson()`, plus immutability triggers on approved rows.
+**Enforced in:** `save_logbook_entry()`, `remove_logbook_entry()`, `submit_logbook()`, `return_logbook()`, `approve_logbook()` RPCs, the open-month check in `schedule_lesson()`, a row lock on the class so a lesson cannot slip into a month while it is being submitted, plus immutability triggers on approved rows.
 
 ## 5. How an invoice becomes Paid, who can mark it, and whether that can be undone
 
