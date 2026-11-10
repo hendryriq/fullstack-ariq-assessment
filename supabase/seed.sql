@@ -1,6 +1,7 @@
 -- Seed Data: Minimal setup for testing the group class enrollment system
 -- Creates: 1 admin, 2 tutors, 3 students, 1 class (capacity 2)
--- 2 students enrolled & paid (capacity full), 1 student not enrolled (can test capacity limit)
+-- 1 student enrolled & paid, 2 not enrolled: student2 can take the last seat,
+-- then student3 hits the capacity limit
 -- Last month's lessons with a submitted logbook (admin can test approval flow)
 --
 -- Dates are relative to the WIB month the seed runs in, so last month's lessons
@@ -83,7 +84,7 @@ INSERT INTO tutor_rates (class_id, rate_per_hour) VALUES
 ON CONFLICT (class_id) DO NOTHING;
 
 -- ============================================================================
--- ENROLLMENTS (2 students enrolled, capacity full)
+-- ENROLLMENTS (1 of 2 seats taken)
 -- Activated a few days before the start of last month (WIB)
 -- ============================================================================
 
@@ -91,13 +92,12 @@ INSERT INTO enrollments (id, class_id, student_id, status, activated_at)
 SELECT v.id::uuid, 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid, v.student_id::uuid, 'active',
   (date_trunc('month', now() AT TIME ZONE 'Asia/Jakarta') - interval '1 month' - interval '3 days') AT TIME ZONE 'Asia/Jakarta'
 FROM (VALUES
-  ('e1111111-1111-1111-1111-111111111111', '44444444-4444-4444-4444-444444444444'),  -- Ahmad (student1)
-  ('e2222222-2222-2222-2222-222222222222', '55555555-5555-5555-5555-555555555555')   -- Dewi (student2)
+  ('e1111111-1111-1111-1111-111111111111', '44444444-4444-4444-4444-444444444444')  -- Ahmad (student1)
 ) AS v(id, student_id)
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
--- INVOICES (both students have paid for 12 hours)
+-- INVOICES (student1 has paid for 12 hours)
 -- ============================================================================
 
 INSERT INTO invoices (id, enrollment_id, hours, rate_snapshot, amount, status, paid_at, paid_by)
@@ -105,8 +105,7 @@ SELECT v.id::uuid, v.enrollment_id::uuid, 12, 150000, 1800000, 'paid',
   (date_trunc('month', now() AT TIME ZONE 'Asia/Jakarta') - interval '1 month' - interval '3 days') AT TIME ZONE 'Asia/Jakarta',
   '11111111-1111-1111-1111-111111111111'::uuid  -- Marked paid by admin
 FROM (VALUES
-  ('c1111111-1111-1111-1111-111111111111', 'e1111111-1111-1111-1111-111111111111'),
-  ('c2222222-2222-2222-2222-222222222222', 'e2222222-2222-2222-2222-222222222222')
+  ('c1111111-1111-1111-1111-111111111111', 'e1111111-1111-1111-1111-111111111111')
 ) AS v(id, enrollment_id)
 ON CONFLICT (id) DO NOTHING;
 
@@ -163,7 +162,7 @@ INSERT INTO logbook_entries (id, logbook_id, lesson_id, topic, activities, tutor
     'd1111111-1111-1111-1111-111111111111',
     'Quadratic Equations - Factoring',
     'Reviewed factoring methods including common factors, difference of squares, and trinomials. Students completed problem set 3.1-3.5 with guidance. Worked through examples on the whiteboard and students practiced independently.',
-    'Both students are grasping the factoring concepts well. Ahmad asked insightful questions about when to use each method. Dewi completed exercises quickly and accurately.',
+    'Ahmad is grasping the factoring concepts well and asked insightful questions about when to use each method.',
     'Continue with graphing quadratic functions next lesson. Prepare coordinate plane practice.'
   ),
   (
@@ -172,7 +171,7 @@ INSERT INTO logbook_entries (id, logbook_id, lesson_id, topic, activities, tutor
     'd2222222-2222-2222-2222-222222222222',
     'Graphing Parabolas',
     'Graphed various parabolas using the vertex form and standard form. Identified vertex, axis of symmetry, and direction of opening. Students practiced plotting points and sketching curves.',
-    'Good progress overall. Both students can identify key features of parabolas. Need more practice with word problems and real-world applications.',
+    'Good progress overall. Ahmad can identify key features of parabolas and needs more practice with word problems and real-world applications.',
     'Introduce completing the square method and connect it to vertex form. Bring real-world examples.'
   )
 ON CONFLICT (id) DO NOTHING;
@@ -191,25 +190,9 @@ INSERT INTO audit_log (event_type, entity_type, entity_id, actor_id, metadata, c
     now() - interval '1 hour'
   ),
   (
-    'enrollment_created',
-    'enrollment',
-    'e2222222-2222-2222-2222-222222222222',
-    '55555555-5555-5555-5555-555555555555',
-    jsonb_build_object('invoice_id', 'c2222222-2222-2222-2222-222222222222', 'hours', 12, 'amount', 1800000),
-    now() - interval '1 hour'
-  ),
-  (
     'invoice_paid',
     'invoice',
     'c1111111-1111-1111-1111-111111111111',
-    '11111111-1111-1111-1111-111111111111',
-    jsonb_build_object('amount', 1800000),
-    now() - interval '1 hour'
-  ),
-  (
-    'invoice_paid',
-    'invoice',
-    'c2222222-2222-2222-2222-222222222222',
     '11111111-1111-1111-1111-111111111111',
     jsonb_build_object('amount', 1800000),
     now() - interval '1 hour'
@@ -232,27 +215,27 @@ INSERT INTO audit_log (event_type, entity_type, entity_id, actor_id, metadata, c
 --   tutor1@stargeneration.test (Budi Santoso)
 --   tutor2@stargeneration.test (Siti Rahayu) - not assigned to any class yet
 --   student1@stargeneration.test (Ahmad Rizki) - enrolled & paid
---   student2@stargeneration.test (Dewi Putri) - enrolled & paid
+--   student2@stargeneration.test (Dewi Putri) - NOT enrolled (can take the last seat)
 --   student3@stargeneration.test (Fajar Ramadhan) - NOT enrolled (can test capacity limit)
 --
 -- Passwords: Admin123!, Tutor123!, Student123!
 --
 -- Classes:
---   Mathematics Grade 10 (capacity 2/2 FULL)
+--   Mathematics Grade 10 (1 of 2 seats taken)
 --   - Student rate: Rp 150,000/hour
 --   - Tutor rate: Rp 100,000/hour
 --   - Assigned to: Budi (tutor1)
 --
 -- Current State:
---   - 2 students enrolled & paid (12 hours each = 720 minutes each)
---   - 2 lessons last month (90 min each = 180 min consumed per student)
---   - Remaining balance: 540 minutes (9 hours) each
+--   - student1 enrolled & paid (12 hours = 720 minutes)
+--   - 2 lessons last month (90 min each = 180 min consumed)
+--   - Remaining balance: 540 minutes (9 hours)
 --   - 1 logbook SUBMITTED (not approved yet)
 --   - Expected earnings: 2 lessons x 90 min x Rp 100k/60 = Rp 300,000 total
 --
 -- Testing Scenarios:
 --   1. Admin login -> preview logbook earnings -> approve (test stale-guard)
---   2. Student3 try to enroll -> should fail (capacity full)
+--   2. Student2 enrolls (takes the last seat), then student3 tries -> should fail (capacity full)
 --   3. Admin void invoice -> should fail (hours already consumed)
 --   4. Tutor view earnings -> should be empty until logbook approved
 --   5. Student view logbooks -> should see nothing until approved
