@@ -14,7 +14,13 @@ const NAV_ITEMS: Record<Role, { href: string; label: string }[]> = {
     { href: "/admin/students", label: "Students" },
   ],
   tutor: [{ href: "/tutor", label: "Overview" }],
-  student: [{ href: "/student", label: "Overview" }],
+  student: [
+    { href: "/student", label: "My classes" },
+    { href: "/student/classes", label: "Browse classes" },
+    { href: "/student/invoices", label: "Invoices" },
+    { href: "/student/schedule", label: "Schedule" },
+    { href: "/student/logbooks", label: "Logbooks" },
+  ],
 };
 
 // The sidebar is layout only. Access is still checked by requireRole() on each page.
