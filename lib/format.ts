@@ -42,6 +42,16 @@ export function isPast(value: string) {
   return new Date(value).getTime() <= Date.now();
 }
 
+export function formatAge(value: string) {
+  const days = Math.floor((Date.now() - new Date(value).getTime()) / 86400000);
+
+  if (days <= 0) {
+    return "Today";
+  }
+
+  return days === 1 ? "1 day" : `${days} days`;
+}
+
 const wibYearMonth = new Intl.DateTimeFormat("en-CA", {
   year: "numeric",
   month: "2-digit",

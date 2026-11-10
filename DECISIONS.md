@@ -105,7 +105,7 @@
 ### A. Admin dashboard: hours left, unpaid invoices, class margin
 
 - **Who it helps:** the admin, who today "cannot easily tell how many hours each student has left, which invoices are still unpaid, or whether a class is profitable".
-- **What it shows:** a per-student hours table with low or overdrawn balances highlighted, unpaid invoices sorted by age, and each class's margin as the brief defines it: what students paid (paid invoices) minus what tutors earned (approved earnings).
+- **What it shows:** a per-student hours table with low (3 hours or less) or overdrawn balances highlighted, unpaid invoices sorted by age, and each class's margin as the brief defines it: what students paid (paid invoices) minus what tutors earned (approved earnings).
 - **Why this over alternatives:** it answers three complaints named in the brief on one screen. A CSV export would keep the admin in spreadsheets, and automatic payment reminders would chase unpaid invoices without answering hours left or profitability.
 - **Left out:** charts, date-range filters, CSV export, email alerts, and a per-hour "recognised" margin. Margin is a cash figure, so it looks high right after a package is paid. I accepted that to keep one formula that matches the brief.
 
@@ -121,7 +121,7 @@
 - **Who it helps:** the admin, and anyone who has to explain a number later. Spreadsheets and WhatsApp leave no reliable record of who changed a price or marked an invoice paid.
 - **What it does:** records who did what and when for class changes, enrollments created or ended, invoices paid, cancelled or voided, cancelled lessons, removed logbook entries, and logbook submit/return/approve, with the reason where one is required. A trigger blocks updates and deletes on the table.
 - **Why this over alternatives:** decisions 3, 4 and 5 deliberately allow corrective actions (ending an enrollment, returning a logbook, voiding an invoice), and an audit trail is what makes those safe. I chose it over in-app notifications because it protects money and accountability first.
-- **Left out:** a rich audit UI. The admin gets a simple filterable list per class and per invoice.
+- **Left out:** a rich audit UI. The admin gets a simple list that can be filtered by record type (class, enrollment, invoice, lesson or logbook).
 
 ---
 

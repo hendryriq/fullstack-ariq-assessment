@@ -10,20 +10,23 @@ export type LessonRow = {
   duration_minutes: number | null;
   status: string;
   cancel_reason: string | null;
+  tutor?: { full_name: string } | null;
 };
 
-// A titled list of lessons. Pages pass renderActions to add a column of actions.
+// A titled list of lessons. Pages can add a tutor column and a column of actions.
 export function LessonTable<Lesson extends LessonRow>({
   title,
   emptyText,
   lessons,
   titleById,
+  showTutor = false,
   renderActions,
 }: {
   title: string;
   emptyText: string;
   lessons: Lesson[];
   titleById: Map<string, string>;
+  showTutor?: boolean;
   renderActions?: (lesson: Lesson) => ReactNode;
 }) {
   return (
@@ -36,6 +39,7 @@ export function LessonTable<Lesson extends LessonRow>({
           <thead>
             <tr>
               <th>Class</th>
+              {showTutor && <th>Tutor</th>}
               <th>Time</th>
               <th>Duration</th>
               <th>Status</th>
@@ -46,6 +50,7 @@ export function LessonTable<Lesson extends LessonRow>({
             {lessons.map((lesson) => (
               <tr key={lesson.id} className="align-top">
                 <td className="font-medium">{titleById.get(lesson.class_id)}</td>
+                {showTutor && <td>{lesson.tutor?.full_name}</td>}
                 <td className="whitespace-nowrap">
                   {formatLessonTime(lesson.starts_at, lesson.ends_at)}
                 </td>
