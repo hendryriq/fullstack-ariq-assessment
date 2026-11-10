@@ -79,6 +79,12 @@ isOneToOne: false
       foreignKeyName: "enrollments_class_id_fkey"
       columns: ["class_id"]
 isOneToOne: false
+      referencedRelation: "class_margin"
+      referencedColumns: ["class_id"]
+    },{
+      foreignKeyName: "enrollments_class_id_fkey"
+      columns: ["class_id"]
+isOneToOne: false
       referencedRelation: "classes"
       referencedColumns: ["id"]
     },{
@@ -149,6 +155,12 @@ isOneToOne: false
       foreignKeyName: "lessons_class_id_fkey"
       columns: ["class_id"]
 isOneToOne: false
+      referencedRelation: "class_margin"
+      referencedColumns: ["class_id"]
+    },{
+      foreignKeyName: "lessons_class_id_fkey"
+      columns: ["class_id"]
+isOneToOne: false
       referencedRelation: "classes"
       referencedColumns: ["id"]
     },{
@@ -207,6 +219,12 @@ isOneToOne: false
       foreignKeyName: "logbooks_class_id_fkey"
       columns: ["class_id"]
 isOneToOne: false
+      referencedRelation: "class_margin"
+      referencedColumns: ["class_id"]
+    },{
+      foreignKeyName: "logbooks_class_id_fkey"
+      columns: ["class_id"]
+isOneToOne: false
       referencedRelation: "classes"
       referencedColumns: ["id"]
     },{
@@ -239,6 +257,12 @@ isOneToOne: false
       foreignKeyName: "student_rates_class_id_fkey"
       columns: ["class_id"]
 isOneToOne: true
+      referencedRelation: "class_margin"
+      referencedColumns: ["class_id"]
+    },{
+      foreignKeyName: "student_rates_class_id_fkey"
+      columns: ["class_id"]
+isOneToOne: true
       referencedRelation: "classes"
       referencedColumns: ["id"]
     }
@@ -256,6 +280,12 @@ isOneToOne: true
                   }
                   Relationships: [
                     {
+      foreignKeyName: "tutor_earnings_class_id_fkey"
+      columns: ["class_id"]
+isOneToOne: false
+      referencedRelation: "class_margin"
+      referencedColumns: ["class_id"]
+    },{
       foreignKeyName: "tutor_earnings_class_id_fkey"
       columns: ["class_id"]
 isOneToOne: false
@@ -297,6 +327,12 @@ isOneToOne: false
       foreignKeyName: "tutor_rates_class_id_fkey"
       columns: ["class_id"]
 isOneToOne: true
+      referencedRelation: "class_margin"
+      referencedColumns: ["class_id"]
+    },{
+      foreignKeyName: "tutor_rates_class_id_fkey"
+      columns: ["class_id"]
+isOneToOne: true
       referencedRelation: "classes"
       referencedColumns: ["id"]
     }
@@ -318,13 +354,27 @@ isOneToOne: true
                 }
           }
           Views: {
-            "student_hours_balance": {
+            "class_margin": {
+                  Row: {
+                    "class_id": string,"earned_by_tutors": number | null,"margin": number | null,"paid_by_students": number | null,"title": string
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    
+                  ]
+                },"student_hours_balance": {
                   Row: {
                     "class_id": string,"consumed_minutes": number | null,"enrollment_id": string,"needs_top_up": boolean | null,"purchased_minutes": number | null,"raw_balance_minutes": number | null,"remaining_minutes": number | null,"student_id": string
                   }
                   ComputedFields: never
                   Relationships: [
                     {
+      foreignKeyName: "enrollments_class_id_fkey"
+      columns: ["class_id"]
+isOneToOne: false
+      referencedRelation: "class_margin"
+      referencedColumns: ["class_id"]
+    },{
       foreignKeyName: "enrollments_class_id_fkey"
       columns: ["class_id"]
 isOneToOne: false
