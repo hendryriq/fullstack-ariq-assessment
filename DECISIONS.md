@@ -133,6 +133,13 @@ How to try each one with the seeded logins, and where it is built: [IMPROVEMENTS
 - **Why this over alternatives:** tutors are paid per lesson whatever the number of students, so a tutor rate above the student rate is not automatically a loss. Two students at Rp150,000 cover a tutor at Rp200,000. A rule forbidding it would reject valid classes, so the system informs the admin and the admin decides. It is calculated from data the admin can already read, with no new table or write path.
 - **Left out:** blocking a rate, a live warning while typing in the form, and forecasting from each student's remaining hours.
 
+### E. When a student's hours run out
+
+- **Who it helps:** students, who see a shortfall before it happens, and the admin, who can ask for a top-up before a balance goes negative.
+- **What it does:** from the paid balance and the lessons already scheduled, the student's My classes page says whether upcoming lessons are covered, from which date they are not, and how many hours are missing. The admin's Hours left table shows the same result per student. Overdrawn time counts as debt, and unpaid invoices are not counted.
+- **Why this over alternatives:** the low-hours flag uses a fixed threshold and says nothing about the schedule. Blocking lessons would go against the decision that access is not revoked automatically.
+- **Left out:** notifications, automatic top-ups, marking uncovered lessons on the Schedule page, and predicting lessons that are not scheduled yet.
+
 ---
 
 ## What I would build next with another day

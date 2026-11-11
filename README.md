@@ -69,7 +69,7 @@ Each step uses only the seeded data.
 4. **Correct it.** As tutor1, open Logbooks, read the note, edit an entry and submit again.
 5. **Approve it.** As admin, approve the logbook. As tutor1, Earnings shows Rp 300.000. As student1, Logbooks now shows it.
 6. **Test the schedule rules.** As tutor1, open Schedule and add a lesson. Then try one that overlaps it, or one longer than 8 hours.
-7. **Oversee it.** As admin, Overview shows hours left, unpaid invoices and class margin. Classes shows the margin per lesson hour and how many students a class needs to break even. Audit shows who did each step above.
+7. **Oversee it.** As admin, Overview shows hours left, whether they cover the upcoming lessons, unpaid invoices and class margin. Classes shows the margin per lesson hour and how many students a class needs to break even. Audit shows who did each step above.
 
 ## Rules worth knowing while testing
 

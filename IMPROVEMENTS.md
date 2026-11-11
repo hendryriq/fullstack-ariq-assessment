@@ -1,6 +1,6 @@
 # Improvements
 
-The brief asks for improvements that solve real problems from "How the business works". This file covers the four I built on top of the required flow and rules: what each one does, how to try it with the seeded logins, and where it is built. `DECISIONS.md` keeps the short version for the decision log, together with the answers to the open decisions, which are not repeated here.
+The brief asks for improvements that solve real problems from "How the business works". This file covers the five I built on top of the required flow and rules: what each one does, how to try it with the seeded logins, and where it is built. `DECISIONS.md` keeps the short version for the decision log, together with the answers to the open decisions, which are not repeated here.
 
 Run `npx supabase db reset` first, so the numbers below match. Every account uses the password `password123`.
 
@@ -10,6 +10,7 @@ Run `npx supabase db reset` first, so the numbers below match. Every account use
 | "Tutors ask the admin every month what they will be paid" | [2. Earnings preview for tutors, with a stale-number guard](#2-tutors-see-what-they-will-be-paid-before-approval) | Tutors and admin |
 | Spreadsheets and WhatsApp leave no reliable record of who changed a price or marked an invoice paid | [3. Append-only audit log](#3-append-only-audit-log) | Admin |
 | The admin cannot tell "whether a class is profitable" until the money has been spent | [4. Margin forecast per lesson hour](#4-margin-forecast-per-lesson-hour) | Admin |
+| The admin "cannot easily tell how many hours each student has left", and a shortfall only shows once the balance is already used up | [5. When a student's hours run out](#5-when-a-students-hours-run-out) | Students and admin |
 
 ## 1. Admin overview: hours left, unpaid invoices, class margin
 
@@ -75,6 +76,18 @@ The Classes page shows the current margin and the break-even for every class. Th
 **Why this over other options.** Tutors are paid per lesson whatever the number of students, so a tutor rate above the student rate is not automatically a loss: two students at Rp 150.000 cover a tutor at Rp 200.000. A rule forbidding it would reject valid classes, so the system informs the admin and the admin decides.
 
 **Left out.** Blocking a rate, a live warning while typing in the form, and forecasting from each student's remaining hours.
+
+## 5. When a student's hours run out
+
+**What it does.** From the paid balance and the lessons already scheduled, the student's My classes page says whether upcoming lessons are covered, from which date they are not, and how many hours are missing. The admin's Hours left table on Overview shows the same result per student, so the admin can ask for a top-up before a balance goes negative. Overdrawn time counts as debt, and unpaid invoices are not counted.
+
+**Try it.** `student1@star.test` has 9 h left and two upcoming lessons of 90 minutes, so My classes says they are covered with 6 h left after that. As `tutor1@star.test`, add an 8-hour lesson after those two. The student now sees 1 upcoming lesson not covered and 2 h missing, and Overview shows the same lesson as not covered. Run `npx supabase db reset` afterwards to remove it.
+
+**How it is built.** One function, `forecastHours()` in `lib/hours-forecast.ts`, takes upcoming non-cancelled lessons in time order and subtracts each from `raw_balance_minutes`. Both pages use it: `app/student/page.tsx` and `app/admin/page.tsx`. There is no new table or write path, and row level security already limits a student to the lessons of their own classes.
+
+**Why this over other options.** The low-hours flag uses a fixed threshold and says nothing about the schedule. Blocking lessons would go against the decision that access is not revoked automatically.
+
+**Left out.** Notifications, automatic top-ups, marking uncovered lessons on the Schedule page, and predicting lessons that are not scheduled yet.
 
 ## Smaller additions
 
