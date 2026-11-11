@@ -103,6 +103,8 @@
 
 ## My own improvements
 
+How to try each one with the seeded logins, and where it is built: [IMPROVEMENTS.md](IMPROVEMENTS.md).
+
 ### A. Admin dashboard: hours left, unpaid invoices, class margin
 
 - **Who it helps:** the admin, who today "cannot easily tell how many hours each student has left, which invoices are still unpaid, or whether a class is profitable".
@@ -123,6 +125,13 @@
 - **What it does:** records who did what and when for class changes, enrollments created or ended, invoices paid, cancelled or voided, cancelled lessons, removed logbook entries, and logbook submit/return/approve, with the reason where one is required. A trigger blocks updates and deletes on the table.
 - **Why this over alternatives:** decisions 3, 4 and 5 deliberately allow corrective actions (ending an enrollment, returning a logbook, voiding an invoice), and an audit trail is what makes those safe. I chose it over in-app notifications because it protects money and accountability first.
 - **Left out:** a rich audit UI. The admin gets a simple list that can be filtered by record type (class, enrollment, invoice, lesson or logbook).
+
+### D. Margin forecast per lesson hour
+
+- **Who it helps:** the admin, who needs to know "whether a class is profitable" before the money is spent. Overview's margin is a cash figure, so a class that will lose money still looks profitable until its logbooks are approved.
+- **What it does:** the Classes page and the Edit class page show, from the current rates, the margin per lesson hour now (active students × student rate − tutor rate), the same figure when the class is full, and how many students it needs to break even. A class that loses money even when full is flagged "Loss when full".
+- **Why this over alternatives:** tutors are paid per lesson whatever the number of students, so a tutor rate above the student rate is not automatically a loss. Two students at Rp150,000 cover a tutor at Rp200,000. A rule forbidding it would reject valid classes, so the system informs the admin and the admin decides. It is calculated from data the admin can already read, with no new table or write path.
+- **Left out:** blocking a rate, a live warning while typing in the form, and forecasting from each student's remaining hours.
 
 ---
 

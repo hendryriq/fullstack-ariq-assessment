@@ -8,7 +8,7 @@ Three role-based views for group classes. One tutor teaches several students, st
 
 Built with TypeScript, Next.js 16 (React 19), Tailwind CSS 4, and Supabase Auth and PostgreSQL.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the design and [DECISIONS.md](DECISIONS.md) for the decision log.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the design, [DECISIONS.md](DECISIONS.md) for the decision log, and [IMPROVEMENTS.md](IMPROVEMENTS.md) for the improvements beyond the brief and how to try them.
 
 ## Requirements
 
@@ -69,7 +69,7 @@ Each step uses only the seeded data.
 4. **Correct it.** As tutor1, open Logbooks, read the note, edit an entry and submit again.
 5. **Approve it.** As admin, approve the logbook. As tutor1, Earnings shows Rp 300.000. As student1, Logbooks now shows it.
 6. **Test the schedule rules.** As tutor1, open Schedule and add a lesson. Then try one that overlaps it, or one longer than 8 hours.
-7. **Oversee it.** As admin, Overview shows hours left, unpaid invoices and class margin. Audit shows who did each step above.
+7. **Oversee it.** As admin, Overview shows hours left, unpaid invoices and class margin. Classes shows the margin per lesson hour and how many students a class needs to break even. Audit shows who did each step above.
 
 ## Rules worth knowing while testing
 
