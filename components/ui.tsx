@@ -151,6 +151,7 @@ const STATUS_TONES = {
   void: "danger",
   needs_top_up: "danger",
   loss: "danger",
+  loss_when_full: "danger",
   draft: "neutral",
   scheduled: "neutral",
   cancelled: "neutral",

@@ -2,9 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ActionForm } from "@/components/action-form";
-import { Card, PageHeader, PageLoading, Table } from "@/components/ui";
+import {
+  Card,
+  PageHeader,
+  PageLoading,
+  StatusBadge,
+  Table,
+} from "@/components/ui";
 import { requireRole } from "@/lib/auth";
 import { formatRupiah } from "@/lib/format";
+import { classForecast, formatStudents } from "@/lib/margin";
 import { createClient } from "@/lib/supabase/server";
 import { createClass } from "./actions";
 import { ClassFields } from "./class-fields";
@@ -58,34 +65,59 @@ async function ClassesContent() {
                 <th>Student rate / h</th>
                 <th>Tutor rate / h</th>
                 <th>Seats held</th>
+                <th>Margin per lesson hour</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {classes.data.map((row) => (
-                <tr key={row.id}>
-                  <td className="font-medium">{row.title}</td>
-                  <td>{row.tutor.full_name}</td>
-                  <td>{formatRupiah(row.student_rates?.rate_per_hour ?? 0)}</td>
-                  <td>{formatRupiah(row.tutor_rates?.rate_per_hour ?? 0)}</td>
-                  <td>
-                    {
-                      row.enrollments.filter(
-                        (enrollment) => enrollment.status !== "cancelled",
-                      ).length
-                    }{" "}
-                    / {row.capacity}
-                  </td>
-                  <td>
-                    <Link
-                      href={`/admin/classes/${row.id}`}
-                      className="font-medium underline"
-                    >
-                      Edit
-                    </Link>
-                  </td>
-                </tr>
-              ))}
+              {classes.data.map((row) => {
+                const forecast = classForecast({
+                  studentRate: row.student_rates?.rate_per_hour ?? 0,
+                  tutorRate: row.tutor_rates?.rate_per_hour ?? 0,
+                  capacity: row.capacity,
+                  activeStudents: row.enrollments.filter(
+                    (enrollment) => enrollment.status === "active",
+                  ).length,
+                });
+
+                return (
+                  <tr key={row.id}>
+                    <td className="font-medium">{row.title}</td>
+                    <td>{row.tutor.full_name}</td>
+                    <td>
+                      {formatRupiah(row.student_rates?.rate_per_hour ?? 0)}
+                    </td>
+                    <td>{formatRupiah(row.tutor_rates?.rate_per_hour ?? 0)}</td>
+                    <td>
+                      {
+                        row.enrollments.filter(
+                          (enrollment) => enrollment.status !== "cancelled",
+                        ).length
+                      }{" "}
+                      / {row.capacity}
+                    </td>
+                    <td className="whitespace-nowrap">
+                      <div className="flex items-center gap-2 font-medium">
+                        {formatRupiah(forecast.marginNow)}
+                        {forecast.lossWhenFull && (
+                          <StatusBadge status="loss_when_full" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted">
+                        Break-even: {formatStudents(forecast.breakEvenStudents)}
+                      </p>
+                    </td>
+                    <td>
+                      <Link
+                        href={`/admin/classes/${row.id}`}
+                        className="font-medium underline"
+                      >
+                        Edit
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </Table>
         )}

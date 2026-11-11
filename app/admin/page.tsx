@@ -161,7 +161,12 @@ async function AdminOverview() {
       </Card>
 
       <Card>
-        <h2 className="font-semibold">Class margin</h2>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-semibold">Class margin</h2>
+          <Link href="/admin/classes" className="text-sm font-medium underline">
+            Forecast per lesson hour
+          </Link>
+        </div>
         <p className="mb-4 text-sm text-muted">
           What students have paid minus what tutors have earned.
         </p>
