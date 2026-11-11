@@ -74,6 +74,10 @@ export function formatRupiah(amount: number) {
   return rupiah.format(amount);
 }
 
+export function formatDate(value: string) {
+  return wibDate.format(new Date(value));
+}
+
 export function formatDateTime(value: string) {
   return `${wibDateTime.format(new Date(value))} WIB`;
 }

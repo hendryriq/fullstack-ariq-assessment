@@ -9,7 +9,13 @@ import {
   Table,
 } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
-import { formatAge, formatDuration, formatRupiah } from "@/lib/format";
+import {
+  formatAge,
+  formatDate,
+  formatDuration,
+  formatRupiah,
+} from "@/lib/format";
+import { forecastHours } from "@/lib/hours-forecast";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Overview" };
@@ -29,10 +35,10 @@ async function AdminOverview() {
   await requireRole("admin");
 
   const supabase = await createClient();
-  const [balances, enrollments, unpaid, margins] = await Promise.all([
+  const [balances, enrollments, unpaid, margins, upcoming] = await Promise.all([
     supabase
       .from("student_hours_balance")
-      .select("enrollment_id, raw_balance_minutes, needs_top_up")
+      .select("enrollment_id, class_id, raw_balance_minutes, needs_top_up")
       .order("raw_balance_minutes"),
     supabase
       .from("enrollments")
@@ -46,12 +52,19 @@ async function AdminOverview() {
       .eq("status", "pending")
       .order("created_at"),
     supabase.from("class_margin").select("*").order("title"),
+    supabase
+      .from("lessons")
+      .select("class_id, starts_at, duration_minutes")
+      .eq("status", "scheduled")
+      .gt("ends_at", new Date().toISOString())
+      .order("starts_at"),
   ]);
 
   if (balances.error) throw balances.error;
   if (enrollments.error) throw enrollments.error;
   if (unpaid.error) throw unpaid.error;
   if (margins.error) throw margins.error;
+  if (upcoming.error) throw upcoming.error;
 
   const enrollmentById = new Map(
     enrollments.data.map((row) => [row.id, row]),
@@ -87,6 +100,7 @@ async function AdminOverview() {
                 <th>Student</th>
                 <th>Class</th>
                 <th>Hours left</th>
+                <th>Upcoming lessons</th>
                 <th>Flag</th>
               </tr>
             </thead>
@@ -94,6 +108,12 @@ async function AdminOverview() {
               {balances.data.map((row) => {
                 const enrollment = enrollmentById.get(row.enrollment_id ?? "");
                 const minutes = row.raw_balance_minutes ?? 0;
+                const forecast = forecastHours(
+                  minutes,
+                  upcoming.data.filter(
+                    (lesson) => lesson.class_id === row.class_id,
+                  ),
+                );
 
                 return (
                   <tr key={row.enrollment_id}>
@@ -103,6 +123,13 @@ async function AdminOverview() {
                     <td>{enrollment?.class.title}</td>
                     <td className="whitespace-nowrap font-medium">
                       {formatDuration(minutes)}
+                    </td>
+                    <td className="whitespace-nowrap">
+                      {forecast.total === 0
+                        ? "None scheduled"
+                        : forecast.firstUncoveredAt
+                          ? `${forecast.uncovered} not covered, from ${formatDate(forecast.firstUncoveredAt)}`
+                          : `All ${forecast.total} covered`}
                     </td>
                     <td>
                       {row.needs_top_up ? (

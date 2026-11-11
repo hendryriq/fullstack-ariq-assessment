@@ -10,7 +10,8 @@ import {
   StatusBadge,
 } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
-import { formatDuration } from "@/lib/format";
+import { formatDate, formatDuration } from "@/lib/format";
+import { forecastHours } from "@/lib/hours-forecast";
 import { createClient } from "@/lib/supabase/server";
 import { requestTopUp } from "./actions";
 import { getClassCatalog } from "./class-catalog";
@@ -26,20 +27,31 @@ export default function StudentPage() {
   );
 }
 
+function formatUpcoming(count: number) {
+  return `${count} upcoming ${count === 1 ? "lesson" : "lessons"}`;
+}
+
 async function MyClasses() {
   await requireRole("student");
 
   const supabase = await createClient();
-  const [catalog, balances] = await Promise.all([
+  const [catalog, balances, upcoming] = await Promise.all([
     getClassCatalog(),
     supabase
       .from("student_hours_balance")
       .select(
         "enrollment_id, class_id, purchased_minutes, consumed_minutes, remaining_minutes, raw_balance_minutes, needs_top_up",
       ),
+    supabase
+      .from("lessons")
+      .select("class_id, starts_at, duration_minutes")
+      .eq("status", "scheduled")
+      .gt("ends_at", new Date().toISOString())
+      .order("starts_at"),
   ]);
 
   if (balances.error) throw balances.error;
+  if (upcoming.error) throw upcoming.error;
 
   const awaitingPayment = catalog.filter(
     (item) => item.my_enrollment_status === "pending_payment",
@@ -67,6 +79,10 @@ async function MyClasses() {
       {balances.data.map((balance) => {
         const item = catalog.find((row) => row.class_id === balance.class_id);
         const overdrawn = Math.min(balance.raw_balance_minutes ?? 0, 0);
+        const forecast = forecastHours(
+          balance.raw_balance_minutes ?? 0,
+          upcoming.data.filter((lesson) => lesson.class_id === balance.class_id),
+        );
 
         return (
           <Card key={balance.enrollment_id}>
@@ -88,6 +104,13 @@ async function MyClasses() {
               <p className="mt-2 text-sm">
                 You have used {formatDuration(-overdrawn)} more than you paid
                 for. Your next top-up covers this first.
+              </p>
+            )}
+            {forecast.total > 0 && (
+              <p className="mt-2 text-sm">
+                {forecast.firstUncoveredAt
+                  ? `Not covered by your paid hours: ${formatUpcoming(forecast.uncovered)}, from ${formatDate(forecast.firstUncoveredAt)}. You need at least ${formatDuration(-forecast.minutesAfter)} more.`
+                  : `Your paid hours cover ${formatUpcoming(forecast.total)}, with ${formatDuration(forecast.minutesAfter)} left after that.`}
               </p>
             )}
             <div className="mt-4">
